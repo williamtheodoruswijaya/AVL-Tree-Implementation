@@ -11,7 +11,6 @@ struct Book{
 	int height;
 	char storeID[101]; // Foreign Key
 	char bookID[101]; // Primary Key
-	char name[101];	
 	char title[101];
 	char author[101];
 	struct Book* left;
@@ -28,12 +27,11 @@ struct Store{
 	struct Store* next;
 }*head = NULL, *tail = NULL;
 
-struct Book* createBook(int key, char storeID[], char bookID[], char name[], char title[], char author[]){
+struct Book* createBook(int key, char storeID[], char bookID[], char title[], char author[]){
 	struct Book* book = (struct Book*)malloc(sizeof(struct Book));
 	book->key = key;
 	strcpy(book->storeID, storeID);
 	strcpy(book->bookID, bookID);
-	strcpy(book->name, name);
 	strcpy(book->title, title);
 	strcpy(book->author, author);
 	book->height = 1;
@@ -84,16 +82,16 @@ struct Book* rightRotate(struct Book* root){
 	return x;
 }
 
-struct Book* insertTree(struct Book* root, int key, char storeID[], char bookID[], char name[], char title[], char author[]){
+struct Book* insertTree(struct Book* root, int key, char storeID[], char bookID[], char title[], char author[]){
 	if(root == NULL){
-		return createBook(key, storeID, bookID, name, title, author);
+		return createBook(key, storeID, bookID, title, author);
 	}
 	else{
 		if(key < root->key){
-			root->left = insertTree(root->left, key, storeID, bookID, name, title, author);
+			root->left = insertTree(root->left, key, storeID, bookID, title, author);
 		}
 		else if(key > root->key){
-			root->right = insertTree(root->right, key, storeID, bookID, name, title, author);
+			root->right = insertTree(root->right, key, storeID, bookID, title, author);
 		}
 	}
 	
@@ -141,12 +139,11 @@ void readFiletoTree(struct Book** root, char storeID[], char difficultyString[])
 	int key;
 	char bookID[101];
 	char storeIDTemp[101];
-	char name[101];
 	char title[101];
 	char author[101];
-	while(fscanf(file, "%d#%[^#]#%[^#]#%[^#]#%[^#]#\n", &key, bookID, storeIDTemp, name, title, author) == 6){
+	while(fscanf(file, "%d#%[^#]#%[^#]#%[^#]#%[^\n]\n", &key, bookID, storeIDTemp, title, author) == 5){
 		if(strcmp(storeID, storeIDTemp) == 0){
-			*root = insertTree(*root, key, storeID, bookID, name, title, author);
+			*root = insertTree(*root, key, storeID, bookID, title, author);
 		}
 	}
 	fclose(file);
@@ -203,19 +200,29 @@ void readStore(char difficultyString[]){
 	fclose(file);
 }
 
-// Front-End Side
-void hideCursor(HANDLE handle, bool state) {
-	CONSOLE_CURSOR_INFO info;
-	info.dwSize = 100;
-	if (state) {
-		info.bVisible = FALSE;
+void popHead(){
+	if(head == NULL){
+		return;
 	}
-	else {
-		info.bVisible = TRUE;	
+	else if(head == tail){
+		free(head);
+		head = tail = NULL;
 	}
-	SetConsoleCursorInfo(handle, &info);
+	else{
+		struct Store* temp = head;
+		head = head->next;
+		head->prev = NULL;
+		free(temp);
+	}
 }
 
+void popQueue(){
+	while(head){
+		popHead();
+	}
+}
+
+// Front-End Side
 void clearScreen(){
 	system("cls");
 }
@@ -226,6 +233,14 @@ void Color(int ColorValue){
 
 void selectOption1(){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	puts("Choose Difficulty");
 	Color(9);
 	printf("1. Easy <<\n");
@@ -237,6 +252,14 @@ void selectOption1(){
 
 void selectOption2(){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	puts("Choose Difficulty");
 	puts("1. Easy");
 	Color(9);
@@ -248,6 +271,14 @@ void selectOption2(){
 
 void selectOption3(){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	puts("Choose Difficulty");
 	puts("1. Easy");
 	puts("2. Medium");
@@ -259,6 +290,14 @@ void selectOption3(){
 
 void selectOption4(){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	puts("Choose Difficulty");
 	puts("1. Easy");
 	puts("2. Medium");
@@ -270,6 +309,14 @@ void selectOption4(){
 
 void viewStoreOption(char difficultyString[]){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	printf("Simulating %s difficulty\n", difficultyString);
 	printf("Choose Menu\n");
 	Color(9);
@@ -277,11 +324,19 @@ void viewStoreOption(char difficultyString[]){
 	Color(7);
 	puts("2. View Customer");
 	puts("3. Navigate");
-	puts("4. Exit");
+	puts("4. Back");
 }
 
 void viewCustomerOption(char difficultyString[]){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	printf("Simulating %s difficulty\n", difficultyString);
 	printf("Choose Menu\n");
 	puts("1. View Store");
@@ -289,11 +344,19 @@ void viewCustomerOption(char difficultyString[]){
 	puts("2. View Customer <<");
 	Color(7);
 	puts("3. Navigate");
-	puts("4. Exit");
+	puts("4. Back");
 }
 
 void navigateOption(char difficultyString[]){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	printf("Simulating %s difficulty\n", difficultyString);
 	printf("Choose Menu\n");
 	puts("1. View Store");
@@ -301,24 +364,41 @@ void navigateOption(char difficultyString[]){
 	Color(9);
 	puts("3. Navigate <<");
 	Color(7);
-	puts("4. Exit");
+	puts("4. Back");
 }
 
 void exitOption(char difficultyString[]){
 	Color(7);
+	puts(" _____                  _    ____              _        _                 ");
+	puts("|  __ \\                (_)  |  _ \\            | |      | |                ");
+	puts("| |__) |   _ _   _ _ __ _   | |_) | ___   ___ | | _____| |_ ___  _ __ ___ ");
+	puts("|  ___/ | | | | | | '__| |  |  _ < / _ \\ / _ \\| |/ / __| __/ _ \\| '__/ _ \\");
+	puts("| |   | |_| | |_| | |  | |  | |_) | (_) | (_) |   <\\__ \\ || (_) | | |  __/");
+	puts("|_|    \\__, |\\__,_|_|  |_|  |____/ \\___/ \\___/|_|\\_\\___/\\__\\___/|_|  \\___|");
+	puts("        __/ |                                                             ");
+	puts("       |___/                                                              ");
 	printf("Simulating %s difficulty\n", difficultyString);
 	printf("Choose Menu\n");
 	puts("1. View Store");
 	puts("2. View Customer");
 	puts("3. Navigate");
 	Color(9);
-	puts("4. Exit <<");
+	puts("4. Back <<");
 	Color(7);
 }
 
+void viewBook(struct Book* root){
+	if (root == NULL) {
+        return;
+    }
+    viewBook(root->left);
+    printf("%s - %s\n", root->title, root->author);
+    viewBook(root->right);
+}
 
 void viewStoreMenus(char difficultyString[]){
 	readStore(difficultyString);
+	clearScreen();
 	printf("Bookstore Lists\n");
 	printf("Choose Bookstore:\n");
 	struct Store* curr = head;
@@ -327,14 +407,33 @@ void viewStoreMenus(char difficultyString[]){
 		printf("%d. %s - %s\n", i++, curr->name, curr->address);
 		curr = curr->next;
 	}
-	printf("%d. Exit\n", i);
-	printf(">> ");
-	
+	printf("0. Back\n");
+
+	int valid = 0;
 	char select[101];
-	scanf(" %[^\n]", select);
-	if(strcmp(select, "Exit") == 0){
-		return;
-	}
+	do{
+		printf(">> ");
+		fgets(select, sizeof(select), stdin);
+		select[strcspn(select, "\n")] = 0;
+		if(strcmp(select, "0") == 0){
+			popQueue();
+			return;
+		}
+		curr = head;
+		while(curr){
+			if(strcmp(curr->name, select) == 0){
+				valid = 1;
+				break;
+			}
+		curr = curr->next;
+		}
+	}while(valid == 0);
+
+	clearScreen();
+    viewBook(curr->root);
+	printf("\nPress any key to continue...");
+	getch();
+	popQueue();
 }
 
 int mainMenuSelection(int menuSelection, char difficultyString[]){
@@ -458,7 +557,6 @@ int main(){
 	keybd_event(VK_F11, 0, 0, 0); // enter fullscreen mode
 	keybd_event(VK_F11, 0, KEYEVENTF_KEYUP, 0);
 	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	hideCursor(consoleHandle, true);
 	chooseDifficulty();
 	return 0;
 }
