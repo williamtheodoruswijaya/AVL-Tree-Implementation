@@ -392,11 +392,46 @@ void viewBook(struct Book* root){
         return;
     }
     viewBook(root->left);
-    printf("%s - %s\n", root->title, root->author);
+    printf("%s - %s\n", root->bookID, root->title);
     viewBook(root->right);
 }
 
+void searchBook(struct Book* root, char search[]){
+	if (root == NULL) {
+		return;
+	}
+	searchBook(root->left, search);
+	if(strcmp(root->title, search) == 0){
+		clearScreen();
+		printf("Book Detail\n");
+		printf("Book ID: %s\n", root->bookID);
+		printf("Title: %s\n", root->title);
+		printf("Author: %s\n", root->author);
+		printf("Press any key to continue...");
+		getch();
+		return;
+	}
+	searchBook(root->right, search);
+}
+
+void viewBookMenu(struct Store* node, struct Book* root){
+	clearScreen();
+	printf("(%s) %s - %s\n", node->coordinate, node->name, node->address);
+	printf("\n");
+	viewBook(root);
+	printf("0. Back\n");
+	printf("\nType to search: ");
+	char search[101];
+	fgets(search, sizeof(search), stdin);
+	search[strcspn(search, "\n")] = 0;
+	if(strcmp(search, "0") == 0){
+		return;
+	}
+	searchBook(root, search);
+}
+
 void viewStoreMenus(char difficultyString[]){
+	start:
 	readStore(difficultyString);
 	clearScreen();
 	printf("Bookstore Lists\n");
@@ -430,10 +465,10 @@ void viewStoreMenus(char difficultyString[]){
 	}while(valid == 0);
 
 	clearScreen();
-    viewBook(curr->root);
-	printf("\nPress any key to continue...");
-	getch();
+    viewBookMenu(curr, curr->root);
 	popQueue();
+	goto start;
+	return;
 }
 
 int mainMenuSelection(int menuSelection, char difficultyString[]){
