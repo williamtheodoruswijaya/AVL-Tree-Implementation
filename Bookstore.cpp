@@ -19,8 +19,7 @@ struct Book{
 }; // AVL Tree
 
 struct Store{
-	char storeID[101]; // Foreign Key
-	char bookID[101]; // Primary Key
+	char storeID[101]; // Primary Key
 	char name[101];
 	char address[101];
 	char coordinate[101];
@@ -37,12 +36,13 @@ struct Book* createBook(int key, char storeID[], char bookID[], char name[], cha
 	strcpy(book->name, name);
 	strcpy(book->title, title);
 	strcpy(book->author, author);
+	book->height = 1;
 	book->left = NULL;
 	book->right = NULL;
 	return book;
 }
 
-int max(int a, int b){
+int getMax(int a, int b){
 	return (a > b) ? a : b;
 }
 
@@ -67,8 +67,8 @@ struct Book* leftRotate(struct Book* root){
 	x->left = root;
 	root->right = subX;
 	
-	root->height = 1 + max(getHeight(root->left), getHeight(root->right));
-	x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+	root->height = 1 + getMax(getHeight(root->left), getHeight(root->right));
+	x->height = 1 + getMax(getHeight(x->left), getHeight(x->right));
 	return x;
 }
 
@@ -79,8 +79,8 @@ struct Book* rightRotate(struct Book* root){
 	x->right = root;
 	root->left = subX;
 	
-	root->height = 1 + max(getHeight(root->left), getHeight(root->right));
-	x->height = 1 + max(getHeight(x->left), getHeight(x->right));
+	root->height = 1 + getMax(getHeight(root->left), getHeight(root->right));
+	x->height = 1 + getMax(getHeight(x->left), getHeight(x->right));
 	return x;
 }
 
@@ -97,7 +97,7 @@ struct Book* insertTree(struct Book* root, int key, char storeID[], char bookID[
 		}
 	}
 	
-	root->height = 1 + max(getHeight(root->left), getHeight(root->right));
+	root->height = 1 + getMax(getHeight(root->left), getHeight(root->right));
 	int balance = getBalance(root);
 	
 	// Left-left case
@@ -121,18 +121,49 @@ struct Book* insertTree(struct Book* root, int key, char storeID[], char bookID[
 	return root;
 }
 
-void enqueue(char storeID[], char bookID[], char name[], char address[], char coordinate[]){
+void readFiletoTree(struct Book** root, char storeID[], char difficultyString[]){
+	char fileName[101];
+	if(strcmp(difficultyString, "Easy") == 0){
+		strcpy(fileName, "book_easy.txt");	
+	}
+	else if(strcmp(difficultyString, "Medium") == 0){
+		strcpy(fileName, "book_medium.txt");	
+	}
+	else if(strcmp(difficultyString, "Hard") == 0){
+		strcpy(fileName, "book_hard.txt");
+	}
+	FILE* file = fopen(fileName, "r");
+	if(file == NULL){
+		printf("WARNING! ERROR IN BOOK FILE!");
+		printf("\n");
+		exit(1);
+	}
+	int key;
+	char bookID[101];
+	char storeIDTemp[101];
+	char name[101];
+	char title[101];
+	char author[101];
+	while(fscanf(file, "%d#%[^#]#%[^#]#%[^#]#%[^#]#\n", &key, bookID, storeIDTemp, name, title, author) == 6){
+		if(strcmp(storeID, storeIDTemp) == 0){
+			*root = insertTree(*root, key, storeID, bookID, name, title, author);
+		}
+	}
+	fclose(file);
+}
+
+void enqueue(char storeID[], char name[], char address[], char coordinate[], char difficultyString[]){
 	struct Store* node = (struct Store*)malloc(sizeof(struct Store));
 	strcpy(node->storeID, storeID);
-	strcpy(node->bookID, bookID);
 	strcpy(node->name, name);
 	strcpy(node->address, address);
 	strcpy(node->coordinate, coordinate);
 	node->prev = NULL;
 	node->next = NULL;
+	node->root = NULL;
 	
 	// AVL Tree insertion
-	
+	readFiletoTree(&node->root, storeID, difficultyString);
 	
 	if(head == NULL){
 		head = tail = node;
@@ -146,29 +177,28 @@ void enqueue(char storeID[], char bookID[], char name[], char address[], char co
 
 void readStore(char difficultyString[]){
 	char fileName[101];
-	if(strcmp(difficultyString, "easy") != 0){
+	if(strcmp(difficultyString, "Easy") == 0){
 		strcpy(fileName, "bookstore_easy.txt");	
 	}
-	else if(strcmp(difficultyString, "medium") != 0){
+	else if(strcmp(difficultyString, "Medium") == 0){
 		strcpy(fileName, "bookstore_medium.txt");	
 	}
-	else if(strcmp(difficultyString, "hard") != 0){
+	else if(strcmp(difficultyString, "Hard") == 0){
 		strcpy(fileName, "bookstore_hard.txt");
 	}
 	
 	char storeID[101];
-	char bookID[101];
 	char name[101];
 	char address[101];
 	char coordinate[101];
 	FILE* file = fopen(fileName, "r");
 	if(file == NULL){
-		printf("WARNING! ERROR IN FILE!");
+		printf("WARNING! ERROR IN STORE FILE!");
 		printf("\n");
 		exit(1);
 	}
-	while(fscanf(file, "%[^#]#%[^#]#%[^#]#%[^#]#%[^#]\n", storeID, bookID, name, address, coordinate) != EOF){
-		
+	while(fscanf(file, "%[^#]#%[^#]#%[^#]#%[^#]#\n", storeID, name, address, coordinate) == 4){
+		enqueue(storeID, name, address, coordinate, difficultyString);
 	}
 	fclose(file);
 }
@@ -176,14 +206,14 @@ void readStore(char difficultyString[]){
 // Front-End Side
 void hideCursor(HANDLE handle, bool state) {
 	CONSOLE_CURSOR_INFO info;
-   	info.dwSize = 100;
-   	if (state) {
-   		info.bVisible = FALSE;
+	info.dwSize = 100;
+	if (state) {
+		info.bVisible = FALSE;
 	}
-   	else {
-   		info.bVisible = TRUE;	
+	else {
+		info.bVisible = TRUE;	
 	}
-   	SetConsoleCursorInfo(handle, &info);
+	SetConsoleCursorInfo(handle, &info);
 }
 
 void clearScreen(){
@@ -286,6 +316,27 @@ void exitOption(char difficultyString[]){
 	Color(7);
 }
 
+
+void viewStoreMenus(char difficultyString[]){
+	readStore(difficultyString);
+	printf("Bookstore Lists\n");
+	printf("Choose Bookstore:\n");
+	struct Store* curr = head;
+	int i = 1;
+	while(curr){
+		printf("%d. %s - %s\n", i++, curr->name, curr->address);
+		curr = curr->next;
+	}
+	printf("%d. Exit\n", i);
+	printf(">> ");
+	
+	char select[101];
+	scanf(" %[^\n]", select);
+	if(strcmp(select, "Exit") == 0){
+		return;
+	}
+}
+
 int mainMenuSelection(int menuSelection, char difficultyString[]){
 	unsigned char control;
 	clearScreen();
@@ -332,6 +383,7 @@ void mainMenu(char difficultyString[]){
 		select = mainMenuSelection(select, difficultyString);
 		switch(select){
 			case 1:
+				viewStoreMenus(difficultyString);
 				break;
 			case 2:
 				
